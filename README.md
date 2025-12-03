@@ -71,3 +71,7 @@ Notable Differences:
 Ultimately, there are many ways for potential improvements of the model and the answer to finding the next potential improvement is through experimentation.
 
 Future Update: XGBoost performed worse by a margin of roughly 2-3%. 
+
+## Credits
+
+Credits to DevTiyah on [codepen](https://codepen.io/DevTiyah/pen/MWxMXgY) for the animated search bar design.

@@ -1,6 +1,12 @@
 import psycopg2
-import config
 import pandas as pd
+import sys
+import os
+
+# Add parent directory to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import config
 
 DB_HOST = config.DB_HOST
 DB_NAME = config.DB_NAME

@@ -86,7 +86,7 @@ CREATE TABLE Roster (
     PRIMARY KEY(player_id),
     FOREIGN KEY (player_id) REFERENCES Players(player_id),
     FOREIGN KEY (team_id) REFERENCES Teams(team_id)
-)
+);
 
 CREATE TABLE Matches (
     match_id VARCHAR(128),

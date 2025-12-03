@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
     </head>
     <body>
-        <section class="header">
+        <section class="player-page">
             <nav>
                 <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='images/Valorant_logo.svg') }}"></a>
                 <div class="nav-links" id="navLinks">
@@ -21,6 +21,18 @@
                         <li><a href="">MATCHES</a></li>
                         <li><a href="{{ url_for('standings') }}">STANDINGS</a></li>
                         <li><a href="">CONTACT</a></li>
+                        <li class=search-bar-item>
+                            <div class="search-box">
+                                <input type="text" id="player_input" placeholder="Search Player IGN...">
+                                <div class="search-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="cancel-icon">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <ul id="suggestions" class="suggestions-list"></ul>
+                            </div>
+                        </li>
                     </ul>
                 </div>
                 <i class="fa fa-bars" onclick="showMenu()"></i>
@@ -30,76 +42,9 @@
                 <h1>VCT: News, Matches, and Analysis</h1>
                 <p>One of the most fun, engaging, and competitive esport scenes in the world.
                 </p>
-                <!-- <a href="" class="hero-btn">Click Here To Find Out More</a> -->
-                 <!----- Player Search Bar ----->
-                <div class="search-box">
-                    <input type="text" id="player_input" placeholder="Search Player IGN...">
-                    <div class="search-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="cancel-icon">
-                        <i class="fas fa-times"></i>
-                    </div>
-                    <ul id="suggestions" class="suggestions-list"></ul>
-            
-                <div class="stats" id="player-stats"></div>
+                <!----- Player Search Bar ----->
+                
             </div>
-        </section>
-
-    <!----- Upcoming Matches ----->
-
-        <section class="matches">
-            <h1>Upcoming Matches</h1>
-            <p>Explore upcoming matches across the globe.</p>
-            <div class="region-filters">
-                <button class="filter-btn active" data-region="ALL">ALL MATCHES</button>
-                <button class="filter-btn" data-region="NA">NORTH AMERICA</button>
-                <button class="filter-btn" data-region="EU">EMEA</button>
-                <button class="filter-btn" data-region="PA">PACIFIC</button>
-                <button class="filter-btn" data-region="CH">CHINA</button>
-            </div>
-            <div class="row">
-                <div class="match-col match1">
-                    <h3>Team vs team</h3>
-                    <p>Date: Time:</p>
-                </div>
-                <div class="match-col match2">
-                    <h3>Team vs team</h3>
-                    <p>Date: Time:</p>
-                </div>
-                <div class="match-col match3">
-                    <h3>Team vs team</h3>
-                    <p>Date: Time:</p>
-                </div>
-            </div>
-
-        </section>
-
-    <!----- Dynamic Standings Page ----->
-
-        <section class="standings">
-            <h1>2025 Regular Season Standings</h1>
-            <div class="region-filters">
-                <button class="filter-btn active" data-region="ALL">ALL MATCHES</button>
-                <button class="filter-btn" data-region="NA">NORTH AMERICA</button>
-                <button class="filter-btn" data-region="EU">EMEA</button>
-                <button class="filter-btn" data-region="PA">PACIFIC</button>
-                <button class="filter-btn" data-region="CH">CHINA</button>
-            </div>
-
-            <div class="leaderboard">
-                <div class="secondPlace">
-
-                </div>
-                <div class="firstPlace">
-
-                </div>
-                <div class="thirdPlace">
-
-                </div>
-            </div>
-
-
         </section>
 
     <!----- Java Script for Toggle Menu ----->

@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
     font-family: "Poppins", sans-serif;
+    box-sizing: border-box;
 }
 .header{
     min-height: 100vh;
@@ -92,10 +93,132 @@ nav img{
     transition: 1s;
 }
 
+/*-------- Player Search Bar --------*/
+::selection{
+  color: #fff;
+  background: #f44336;
+}
+.search-box{
+  position: relative;
+  height: 60px;
+  width: 60px;
+  border-radius: 50%;
+  box-shadow: 5px 5px 30px rgba(0,0,0,.2);
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  margin: 0 auto;
+}
+.search-box.active{
+  width: 350px;
+}
+.search-box input{
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 50px;
+  background: #fff;
+  outline: none;
+  padding: 0 60px 0 20px;
+  font-size: 18px;
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.search-box input.active{
+  opacity: 1;
+}
+.search-box input::placeholder{
+  color: #a6a6a6;
+}
+.search-box .search-icon{
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60px;
+  width: 60px;
+  background: #fff;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 60px;
+  font-size: 22px;
+  color: #f44336;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.search-box .search-icon.active{
+  right: 5px;
+  height: 50px;
+  line-height: 50px;
+  width: 50px;
+  font-size: 20px;
+  background: #f44336;
+  color: #fff;
+  transform: translateY(-50%) rotate(360deg);
+}
+.search-box .cancel-icon{
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 25px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.5s 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.search-box .cancel-icon.active{
+  right: -40px;
+  transform: translateY(-50%) rotate(360deg);
+}
+
+/* --- Player Suggestions List --- */
+.suggestions-list {
+    position: absolute;
+    top: 65px;
+    left: 0;
+    width: 100%;
+
+    border-radius: 0 0 30px 30px; 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+    max-height: 0; /* Starts hidden */
+    overflow: hidden;
+    z-index: 5;
+    
+    transition: max-height 0.3s ease-in-out; 
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0 10px;
+}
+
+.suggestions-list.active {
+    max-height: 250px; /* Revealed height */
+    padding-bottom: 5px;
+}
+
+.suggestion-item {
+    padding: 8px 15px;
+    background: #ffffff;
+    color: #000000;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px; 
+    transition: background 0.2s, color 0.2s; /* hover transition */
+}
+
+/* Add a hover effect */
+.suggestion-item:hover {
+    background: #f44336;
+    color: #fff;
+}
+
 nav .fa{
     display: none;
 }
 
+/*-------- Mobile Tailoring --------*/
 @media(max-width: 700px){
     .text-box h1{
         font-size: 20px;
@@ -132,7 +255,6 @@ nav .fa{
 }
 
 /*-------- Matches --------*/
-
 .matches{
     width: 80%;
     margin: auto;
@@ -361,4 +483,152 @@ nav .fa{
     color: #000;
     border-color: #f44336;
     font-weight: 600;
+}
+
+/* ------ Players Page ------*/
+.player-page .text-box{
+    width: 90%;
+    color: #000;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+.player-page .text-box h1{
+    font-size: 62px;
+}
+.player-page .text-box p{
+    margin: 10px 0px 40px;
+    font-size: 14px;
+    color: #000;
+}
+
+/*-------- Player Menu Bar --------*/
+.nav-links ul {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-links ul li {
+    list-style: none;
+    display: inline-block;
+    padding: 8px 12px;
+    position: relative;
+    overflow: visible;
+}
+
+.nav-links ul li.search-bar-item {
+    padding: 0 12px;
+}
+
+/*-------- Player Search Bar --------*/
+.player-page .search-box {
+    position: relative;
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+    box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.player-page .search-box.active {
+    width: 250px;
+    height: 25px;
+}
+
+.player-page .search-box input {
+    padding: 0 50px 0 15px;
+    font-size: 14px;
+}
+
+.player-page .search-box .search-icon {
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 25px;
+    width: 25px;
+    background: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 25px;
+    font-size: 14px;
+    color: #f44336;
+    cursor: pointer;
+    z-index: 1;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)
+}
+
+.player-page .search-box .search-icon.active {
+    right: 0px;
+    height: 25px;
+    line-height: 25px;
+    width: 25px;
+    font-size: 14px;
+    background: #f44336;
+    color: #fff;
+    transform: translateY(-50%) rotate(360deg);
+}
+
+.player-page .search-box .cancel-icon {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #f44336;
+    color: #fff;
+    transition: all 0.5s 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.player-page .search-box .cancel-icon.active {
+    left: 260px;
+    color: #fff;
+    transform: translateY(-50%);
+}
+
+/* --- Player Suggestions List --- */
+.player-page .suggestions-list {
+    position: absolute;
+    top: 35px;
+    left: 0;
+    width: 100%;
+
+    border-radius: 0 0 30px 30px; 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+    max-height: 0; /* Starts hidden */
+    overflow: hidden;
+    z-index: 5;
+    
+    transition: max-height 0.3s ease-in-out; 
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0 10px;
+}
+
+.player-page .suggestions-list.active {
+    max-height: 250px; /* Revealed height */
+    padding-bottom: 5px;
+}
+
+.player-page .suggestion-item {
+    padding: 8px 15px;
+    background: #ffffff;
+    color: #000000;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px; 
+    transition: background 0.2s, color 0.2s; /* hover transition */
+}
+
+/* Add a hover effect */
+.player-page .suggestion-item:hover {
+    background: #f44336;
+    color: #fff;
 }
