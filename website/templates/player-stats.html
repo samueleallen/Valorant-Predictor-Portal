@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
     </head>
     <body>
-        <section class="player-page">
+        <section class="player-stats-page">
             <nav>
                 <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='images/Valorant_logo.svg') }}"></a>
                 <div class="nav-links" id="navLinks">
@@ -22,49 +22,25 @@
                         <li><a href="{{ url_for('standings') }}">STANDINGS</a></li>
                         <li><a href="{{ url_for('players') }}">PLAYERS</a></li>
                         <li><a href="{{ url_for('admin') }}">DATA MANAGEMENT</a></li>
+                        <li class=search-bar-item>
+                            <div class="search-box">
+                                <input type="text" id="player_input" placeholder="Search Player IGN...">
+                                <div class="search-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="cancel-icon">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <ul id="suggestions" class="suggestions-list"></ul>
+                            </div>
+                        </li>
                     </ul>
                 </div>
                 <i class="fa fa-bars" onclick="showMenu()"></i>
             </nav>
 
-            <li class=search-bar-item>
-                
-                <div class="search-box">
-                    <input type="text" id="player_input" placeholder="Search Player IGN...">
-                    <div class="search-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="cancel-icon">
-                        <i class="fas fa-times"></i>
-                    </div>
-                </div>
-                <select id="agent-filter">
-                    <option value="All">All Agents</option>
-                    <option value="jett">Jett</option>
-                    <option value="reyna">Reyna</option>
-                    <option value="phoenix">Phoenix</option>
-                    <option value="astra">Astra</option>
-                    <option value="killjoy">Killjoy</option>
-                    <option value="omen">Omen</option>
-                </select>
-                <select id="region-filter">
-                    <option value="All">All Regions</option>
-                    <option value="Americas">Americas</option>
-                    <option value="China">China</option>
-                    <option value="EMEA">EMEA</option>
-                    <option value="Pacific">Pacific</option>
-                </select>
-
-                <div class="toggle-container">
-                    <label for="timespan">Recent (90d)</label>
-                    <input type="checkbox" id="timespan-toggle">
-                </div>
-                    <ul id="suggestions" class="suggestions-list"></ul>
-                </div>
-            </li>
-
-            <div class="player-table-container">
-                <div id="player-table"></div>
+            <div class="player-stats-container">
+                <div id="player-stats"></div>
             </div>
         </section>
 
@@ -86,10 +62,7 @@
             const cancelButton = document.querySelector(".cancel-icon");
             const searchInput = document.getElementById("player_input");
             const suggestions = document.getElementById("suggestions");
-            const playerTableDiv = document.getElementById("player-table");
-            const regionFilter = document.getElementById("region-filter");
-            const agentFilter = document.getElementById("agent-filter");
-            const timespanToggle = document.getElementById("timespan-toggle");
+            const playerStatsDiv = document.getElementById("player-stats");
 
             searchButton.onclick =()=>{
                 searchBox.classList.add("active");
@@ -167,28 +140,22 @@
             }
 
             // Fetch stats for player and dynamically load table
-            async function fetchPlayersTable() {
-                const region = regionFilter.value;
-                const agent = agentFilter.value;
-                const isRecent = timespanToggle.checked;
-                const timespan = isRecent ? "90_Days" : "All";
-                const playerName = searchInput.value;
-                const url = `http://localhost:3000/players/filtered?regionName=${encodeURIComponent(region)}&mainAgent=${encodeURIComponent(agent)}&timespan=${encodeURIComponent(timespan)}&`;
-
+            async function fetchPlayerStats(playerName) {
                 try {
-                    const res = await fetch(url);
-                    if (!res.ok) throw new Error("Could not find players.");
+                    const res = await fetch(`http://localhost:3000/player/${playerName}`);
+                    if (!res.ok) throw new Error("Player not found.");
                     const data = await res.json();
+                    const stats = data.stats;
 
                     // Display stats
-                    let htmlContent = `<h2>Search Results`;
+                    let htmlContent = `<h2>${data.player_name} Stats`;
                     
-                        if (data && data.length > 0) {
+                        if (stats && stats.length > 0) {
                             // Get unique column headers
-                            const headers = Object.keys(data[0])
+                            const headers = Object.keys(stats[0])
 
                             // Build table HTML
-                            htmlContent += '<div class="players-table-wrapper">';
+                            htmlContent += '<div class="stats-table-wrapper">';
                             htmlContent += '<table>'
                             
                             // Table header
@@ -202,12 +169,12 @@
 
                             // Table Body
                             htmlContent += '<tbody>';
-                            data.forEach(dataRow => {
+                            stats.forEach(statRow => {
                                 htmlContent += '<tr>';
                                 // Loop through columns for each row
                                 headers.forEach(header => {
                                     // Output data content for each cell
-                                    htmlContent += `<td>${dataRow[header]}</td>`;
+                                    htmlContent += `<td>${statRow[header]}</td>`;
                                 });
                                 htmlContent += '</tr>';
                             });
@@ -217,25 +184,40 @@
                             htmlContent += '</div>';
                         }
                     else {
-                        htmlContent += '<p>No players available for these filters.</p>';
+                        htmlContent += '<p>No stats available for this player.</p>';
                     }
-                    playerTableDiv.innerHTML = htmlContent;
+                    playerStatsDiv.innerHTML = htmlContent;
 
                 } catch (err) {
                     console.error(err);
-                    playerTableDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    playerStatsDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
                 }
             }
+            
+            // Function to fetch player name from URL
+            function getPlayerNameFromURL() {
+                const path = window.location.pathname;
+                const parts = path.split('/');
+                const potentialPlayerName = parts[parts.length - 1];
 
-            // Add filter event listeners
-            regionFilter.addEventListener("change", fetchPlayersTable);
-            agentFilter.addEventListener("change", fetchPlayersTable);
-            timespanToggle.addEventListener("change", fetchPlayersTable);
+                // Check for existence and make sure we aren't just on the /players page
+                if (potentialPlayerName && potentialPlayerName != 'players') {
+                    return decodeURIComponent(potentialPlayerName);
+                }
+                return null;
+            }
+
+            // Auto-load table
+            const initialPlayerName = getPlayerNameFromURL();
+
+            if (initialPlayerName) {
+                // If we successfully found a player name in the URL, fetch the stats
+                fetchPlayerStats(initialPlayerName);
+                searchInput.value = initialPlayerName;
+            }
 
             searchInput.addEventListener("input", showSuggestions); // Trigger suggestions as user types
-            document.addEventListener("DOMContentLoaded", () => { // Auto-load table
-                fetchPlayersTable();
-            })
+
         </script>
     </body>
 </html>

@@ -91,8 +91,8 @@ CREATE TABLE Roster (
 CREATE TABLE Matches (
     match_id VARCHAR(128),
     date_played DATE NOT NULL,
-    winner_team_id INT,
-    loser_team_id INT,
+    team1_id INT,
+    team2_id INT,
     t1_won BOOLEAN,
     PRIMARY KEY (match_id),
     FOREIGN KEY (winner_team_id) REFERENCES Teams (team_id),

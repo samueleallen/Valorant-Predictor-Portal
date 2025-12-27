@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name = "viewport" content="with=device-width, initial-scale=1.0">
+            <title>Valorant Esports Portal</title>
+            <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,600;1,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
+    </head>
+    <body>
+        <section class="player-manager-page">
+            <nav>
+                <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='images/Valorant_logo.svg') }}"></a>
+                <div class="nav-links" id="navLinks">
+                    <i class="fa fa-times" onclick="hideMenu()"></i>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}">HOME</a></li>
+                        <li><a href="{{ url_for('teams') }}">TEAMS</a></li>
+                        <li><a href="{{ url_for('matches') }}">MATCHES</a></li>
+                        <li><a href="{{ url_for('standings') }}">STANDINGS</a></li>
+                        <li><a href="{{ url_for('players') }}">PLAYERS</a></li>
+                        <li><a href="{{ url_for('admin') }}">DATA MANAGEMENT</a></li>
+                    </ul>
+                </div>
+                <i class="fa fa-bars" onclick="showMenu()"></i>
+            </nav>
+
+            <div class="text-box">
+                <h1>Player Manager</h1>
+                <p>Explore below to add, update, or remove data regarding players.</p>
+            </div>
+
+            <li class=search-bar-item>
+                <div class="search-box">
+                    <input type="text" id="player_input" placeholder="Search Player IGN...">
+                    <div class="search-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="cancel-icon">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <ul id="suggestions" class="suggestions-list"></ul>
+                </div>
+            </li>
+
+            <div class="form-container">
+                <div class="title">Player Change</div>
+                <div class="content">
+                <form action="">
+                    <div class="user-details">
+                        <div class="operation-details">
+                            <input type="radio" value="Add" name="operation" id="op-add" checked>
+                            <input type="radio" value="Update" name="operation" id="op-update">
+                            <input type="radio" value="Remove" name="operation" id="op-remove">
+
+                            <span class="operation-title">Operation</span>
+
+                            <div class="category">
+                                <label for="op-add">
+                                    <span class="dot one"></span>
+                                    <span class="operation">Add</span>
+                                </label>
+
+                                <label for="op-update">
+                                    <span class="dot two"></span>
+                                    <span class="operation">Update</span>
+                                </label>
+
+                                <label for="op-remove">
+                                    <span class="dot three"></span>
+                                    <span class="operation">Remove</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="optional-fields-container">
+                            <div class="input-box" id="player-name-box">
+                                <span class="details">Player Name</span>
+                                <input type="text" id="player-name-input" placeholder="Enter player IGN">
+                            </div>
+                            <div class="input-box" id="team-name-box">
+                                <span class="details">Team Name</span>
+                                <input type="text" id="team-name-input" placeholder="Enter Team Name">
+                            </div>
+                            <div class="input-box" id="new-name-box">
+                                <span class="details">New Name</span>
+                                <input type="text" id="new-name-input" placeholder="Enter New Name">
+                            </div>
+                            <div class="input-box" id="new-team-box">
+                                <span class="details">New Team</span>
+                                <input type="text" id = "new-team-input"placeholder="Enter New Team">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="button">
+                    <input type="submit" value="Register" id="submit-button">
+                    </div>
+                </form>
+                </div>
+            </div>
+
+            <div class="players-container">
+                <div id="players"></div>
+            </div>
+
+        
+        </section>
+
+    <!----- Java Script for Toggle Menu ----->
+        <script>
+            var navLinks = document.getElementById("navLinks");
+            function showMenu(){
+                navLinks.style.right = "-50px";
+            }
+            function hideMenu(){
+                navLinks.style.right = "-200px";
+            }
+            
+            // Add this to your existing JavaScript
+            operationRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    console.log('Radio changed to:', e.target.value);
+                    console.log('Radio checked:', e.target.checked);
+                    console.log('Radio ID:', e.target.id);
+                });
+            });
+
+            // Also test if labels are working
+            document.querySelectorAll('.operation-details .category label').forEach(label => {
+                label.addEventListener('click', (e) => {
+                    console.log('Label clicked:', e.currentTarget.getAttribute('for'));
+                });
+            });
+        </script>
+
+
+    <!----- Java Script for Player Search ----->
+        <script>
+            const searchBox = document.querySelector(".search-box");
+            const searchButton = document.querySelector(".search-icon");
+            const cancelButton = document.querySelector(".cancel-icon");
+            const searchInput = document.getElementById("player_input");
+            const suggestions = document.getElementById("suggestions");
+            const playerDiv = document.getElementById("players");
+
+            searchButton.onclick =()=>{
+                searchBox.classList.add("active");
+                searchButton.classList.add("active");
+                searchInput.classList.add("active");
+                cancelButton.classList.add("active");
+                searchInput.focus();
+
+                if (searchInput.value != "") {
+                    // searchData.classList.remove("active");
+                    fetchPlayerStats(searchInput.value);
+                    suggestions.innerHTML = "";
+                }
+            }
+            cancelButton.onclick =()=> {
+                searchBox.classList.remove("active");
+                searchButton.classList.remove("active");
+                searchInput.classList.remove("active");
+                cancelButton.classList.remove("active");
+                suggestions.classList.remove("active");
+                searchInput.value = "";
+            }
+
+            // Function to fetch all players for autocomplete
+            async function fetchPlayers() {
+                try {
+                    const res = await fetch(`http://localhost:3000/players`);
+                    if (!res.ok) throw new Error("Failed to fetch players.");
+                    const data = await res.json();
+                    return data.map(p => p.player_name);
+                } catch (err) {
+                    console.error(err);
+                    return [];
+                }
+            }
+
+            // Filter and show suggestions
+            async function showSuggestions() {
+                // Fetch player list
+                const allPlayers = await fetchPlayers();
+
+                // Set query for player
+                const query = searchInput.value.toLowerCase();
+                suggestions.innerHTML = "";
+                
+                // If empty query, remove active status and return
+                if (!query) {
+                    suggestions.classList.remove("active");
+                    return;
+                }
+                
+                // Find top 5 players that match the input string
+                const matches = allPlayers.filter(name => name.toLowerCase().includes(query)).slice(0, 5)
+
+                
+                matches.forEach(name => {
+                    const li = document.createElement("li");
+                    li.textContent = name;
+                    li.classList.add("suggestion-item");
+                    li.addEventListener("click", () => {
+                        window.location.href = `/players/${encodeURIComponent(name)}`;
+                        // searchInput.value = name;
+                        // suggestions.innerHTML = "";
+                        // suggestions.classList.remove("active");
+                        // fetchPlayerStats(name);
+                    });
+                    suggestions.appendChild(li);
+                });
+
+                if (matches.length > 0) {
+                    suggestions.classList.add("active");
+                } else {
+                    suggestions.classList.remove("active");
+                }
+            }
+
+            searchInput.addEventListener("input", showSuggestions); // Trigger suggestions as user types
+
+        </script>
+
+    <!----- Java Script for Player Table ----->
+        <script>
+            // Fetch player and dynamically load table
+            async function fetchPlayersTable() {
+                try {
+                    const res = await fetch(`http://localhost:3000/admin/players`);
+                    if (!res.ok) throw new Error("Could not load table.");
+                    const data = await res.json();
+                    const player = data.player_name;
+                    const team = data.team_name;
+
+                    const playersDiv = document.getElementById("players")
+
+                    // Display stats
+                    let htmlContent = `<h2>All Players</h2>`;
+                    
+                        if (data && data.length > 0) {
+                            // Get unique column headers
+                            const headers = Object.keys(data[0])
+
+                            // Build table HTML
+                            htmlContent += '<div class="players-table-wrapper">';
+                            htmlContent += '<table>'
+                            
+                            // Table header
+                            htmlContent += '<thead><tr>';
+                            headers.forEach(header => {
+                                // Clean up headers
+                                const displayHeader = header.split('_').map(word => word.charAt().toUpperCase() + word.slice(1)).join(' ');
+                                htmlContent += `<th>${displayHeader}</th>`;
+                            });
+                            htmlContent += '</tr></thead>';
+
+                            // Table Body
+                            htmlContent += '<tbody>';
+                            data.forEach(dataRow => {
+                                htmlContent += '<tr>';
+                                // Loop through columns for each row
+                                headers.forEach(header => {
+                                    // Output data content for each cell
+                                    htmlContent += `<td>${dataRow[header]}</td>`;
+                                });
+                                htmlContent += '</tr>';
+                            });
+                            // Close final wrappers
+                            htmlContent += '</tbody>';
+                            htmlContent += '</table>';
+                            htmlContent += '</div>';
+                        }
+                    else {
+                        console.error("Element with ID 'player' was not found.");
+                    }
+                    playersDiv.innerHTML = htmlContent;
+
+                } catch (err) {
+                    console.error(err);
+                    const playersDiv = document.getElementById("players")
+                    if (playersDiv) {
+                        playersDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    }
+                    
+                }
+            }
+            fetchPlayersTable();
+        </script>
+
+        <!----- Java Script for Form ----->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const operationRadios = document.querySelectorAll('input[name="operation"]');
+                const submitButton = document.getElementById('submit-button');
+                const playerNameBox = document.getElementById('player-name-box');
+                const newNameBox = document.getElementById('new-name-box');
+                const teamBox = document.getElementById('team-name-box');
+                const newTeamBox = document.getElementById('new-team-box');
+
+                const form = document.querySelector('.form-container form');
+                const playerNameInput = document.getElementById('player-name-input');
+                const newPlayerNameInput = document.getElementById('new-name-input');
+                const teamNameInput = document.getElementById('team-name-input');
+                const newTeamNameInput = document.getElementById('new-team-input');
+
+                // Helper function for toggling visibility for a list of elements
+                function toggleVisibility(elements, show) {
+                    let action;
+
+                    if (show) {
+                        action = 'remove';
+                    } else {action = 'add';}
+                    elements.forEach(el => {
+                        if (el) {el.classList[action]('hidden');}
+                    });
+                }
+                // Function to update form based on selection of operation (Add, Update, or Remove)
+                function updateForm() {
+                    // Get currently selected operation
+                    const selectedOperation = document.querySelector('input[name="operation"]:checked').value;
+
+                    const allToggleableBoxes = [playerNameBox, teamBox, newNameBox, newTeamBox];
+
+                    // Reset the form state
+                    toggleVisibility(allToggleableBoxes, true);
+                    
+                    // Reset required attributes
+                    playerNameInput.required = false;
+                    teamNameInput.required = false;
+                    newPlayerNameInput.required = false;
+                    newTeamNameInput.required = false;
+
+                    // Clear input of hidden fields
+                    newPlayerNameInput.value = '';
+                    newTeamNameInput.value = '';
+
+                    switch (selectedOperation) {
+                        case 'Add':
+                            // Only needs player name and team name visible
+                            toggleVisibility([newNameBox, newTeamBox], false); 
+                            toggleVisibility([playerNameBox, teamBox], true);
+
+                            playerNameInput.required = true;
+                            teamNameInput.required = true;
+
+                            submitButton.value = 'Add Player';
+                            break;
+                        case 'Update':
+                            // Needs all buttons to be visible
+                            submitButton.value = 'Update Player';
+
+                            playerNameInput.required = true;
+                            
+                            break;
+                        case 'Remove':
+                            // Only needs player name and team name visible
+                            toggleVisibility([newNameBox, newTeamBox], false); 
+                            toggleVisibility([playerNameBox, teamBox], true);
+
+                            playerNameInput.required = true;
+
+                            submitButton.value = 'Remove Player';
+                            break;
+                    }
+                }
+
+                operationRadios.forEach(radio => {
+                    radio.addEventListener('change', updateForm);
+                });
+
+                updateForm();
+
+                // Form Submission
+                // Helper function for display status messages
+                function displayStatus(message, isError = false) {
+                    const playersDiv = document.getElementById("players");
+                    if (playersDiv) {
+                        playersDiv.insertAdjacentHTML('beforebegin', `<p id="status-message" style="color:${isError ? 'red' : 'green'}; font-weight: bold; margin-bottom: 10px;">${message}</p>`);
+                    }
+                    // Remove message after a few seconds
+                    setTimeout(() => {
+                        const statusMessage = document.getElementById('status-message');
+                        if (statusMessage) statusMessage.remove();
+                    }, 5000);
+                }
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    // Get current operation (Add, update, or remove player)
+                    const selectedOperation = document.querySelector('input[name="operation"]:checked').value;
+                    let method;
+                    let body = {};
+                    let url = 'http://localhost:3000/admin/players';
+
+                    // Remove any old status messages
+                    const oldStatus = document.getElementById('status-message');
+                    if (oldStatus) oldStatus.remove();
+                    
+                    try {
+                        if (selectedOperation == 'Add') {
+                            body = {player_ign: playerNameInput.value, team_name: teamNameInput.value};
+                            method = 'POST';
+                        }
+                        else if (selectedOperation == 'Update') {
+                            body = {curr_ign: playerNameInput.value, new_ign: newPlayerNameInput.value || undefined, new_team_name: newTeamNameInput.value || undefined};
+                            method = 'PUT';
+                        }
+                        else if (selectedOperation == 'Remove') {
+                            body = {curr_ign: playerNameInput.value, new_ign: newPlayerNameInput.value || undefined, new_team_name: newTeamNameInput.value || undefined};
+                            method = 'DELETE';
+                            url = url + '/' + encodeURIComponent(playerNameInput.value);
+                        }
+                        
+                        // Execute fetch request
+                        const res = await fetch(url, {method: method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+                        const data = await res.json();
+
+                        if (res.ok) {
+                            displayStatus(`Success: ${data.message || 'Operation sucessfully completed.'}`, false);
+                            fetchPlayersTable();
+                        } else {
+                            displayStatus(`Error: ${data.error || 'Operation could not be completed.'} - ${data.message || ''}`, true );
+                        }
+                    } catch (err) {
+                        console.error("Could not make change to database.")
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

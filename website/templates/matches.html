@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name = "viewport" content="with=device-width, initial-scale=1.0">
+            <title>Matches Page</title>
+            <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,600;1,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
+    </head>
+    <body class="matches-page">
+        <div class="content-container">
+            <section class="menu">
+                <nav>
+                    <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='images/Valorant_logo.svg') }}"></a>
+                    <div class="nav-links" id="navLinks">
+                        <i class="fa fa-times" onclick="hideMenu()"></i>
+                        <ul>
+                            <li><a href="{{ url_for('index') }}">HOME</a></li>
+                            <li><a href="{{ url_for('teams') }}">TEAMS</a></li>
+                            <li><a href="{{ url_for('matches') }}">MATCHES</a></li>
+                            <li><a href="{{ url_for('standings') }}">STANDINGS</a></li>
+                            <li><a href="{{ url_for('players') }}">PLAYERS</a></li>
+                            <li><a href="{{ url_for('admin') }}">DATA MANAGEMENT</a></li>
+                        </ul>
+                    </div>
+                    <i class="fa fa-bars" onclick="showMenu()"></i>
+                </nav>
+            </section>
+            <section class="region-menu">
+                <div class="region-menu-filters">
+                    <button class="filter-btn active" data-region="ALL">GLOBAL</button>
+                    <button class="filter-btn" data-region="NA">NORTH AMERICA</button>
+                    <button class="filter-btn" data-region="EU">EMEA</button>
+                    <button class="filter-btn" data-region="PA">PACIFIC</button>
+                    <button class="filter-btn" data-region="CH">CHINA</button>
+                </div>
+            </section>
+    <!----- Monthly Team Power Rankings Section ----->
+        <section class="team-tier-list">
+            <h1>Monthly Power Rankings</h1>
+            <p>Power rankings for this month's teams.</p>
+            <div class="region-filters">
+                <button class="filter-btn active" data-region="ALL">All</button>
+                <button class="filter-btn" data-region="NA">Americas</button>
+                <button class="filter-btn" data-region="EU">EMEA</button>
+                <button class="filter-btn" data-region="PA">Pacific</button>
+                <button class="filter-btn" data-region="CH">China</button>
+            </div>
+            <div class="team-tier-list-container">
+                <div id="team-stats"></div>
+            </div>
+        </section>
+        </div>
+        <!----- Java Script for Toggle Menu ----->
+        <script>
+            var navLinks = document.getElementById("navLinks");
+            function showMenu(){
+                navLinks.style.right = "-50px";
+            }
+            function hideMenu(){
+                navLinks.style.right = "-200px";
+            }
+
+        </script>
+
+    <!----- Java Script for Region Filters and Team Tier List ----->
+        <script>
+            const matchesContainer = document.querySelector('.region-menu .region-menu-filters');
+            const matchesFilterButtons = matchesContainer.querySelectorAll('.filter-btn');
+            const teamContainer = document.querySelector('.team-tier-list .region-filters');
+            const teamFilterButtons = teamContainer.querySelectorAll('.filter-btn');
+            
+
+            // Function to handle toggling logic
+            function toggleFilter(buttons, clickedButton) {
+                buttons.forEach(btn => btn.classList.remove('active'));
+
+                clickedButton.classList.add('active');
+            }
+
+            // Function to get currently active region filter
+            function getRegion() {
+                const activeButton = teamContainer.querySelector('.filter-btn.active');
+                return activeButton.textContent;
+            }
+
+            // Attach listeners to matches buttons
+            matchesFilterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    toggleFilter(matchesFilterButtons, button);
+                });
+            });
+
+            // Attach listeners to team buttons
+            teamFilterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    toggleFilter(teamFilterButtons, button);
+                });
+            });
+
+            // Fetch Team Tier List and dynamically load table
+            async function fetchTeamsTable(regionName) {
+                try {
+                    const url = `http://localhost:3000/team/tierlist?regionName=${regionName}`
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error("Could not load table.");
+                    const data = await res.json();
+
+                    const teamsDiv = document.getElementById("team-stats")
+
+                    // Display stats
+                    let htmlContent = `<h2>Ranking</h2>`;
+                    
+                        if (data && data.length > 0) {
+                            // Get unique column headers
+                            const headers = Object.keys(data[0])
+
+                            // Build table HTML
+                            htmlContent += '<div class="teams-table-wrapper">';
+                            htmlContent += '<table>'
+                            
+                            // Table header
+                            htmlContent += '<thead><tr>';
+                            headers.forEach(header => {
+                                // Clean up headers
+                                const displayHeader = header.split('_').map(word => word.charAt().toUpperCase() + word.slice(1)).join(' ');
+                                htmlContent += `<th>${displayHeader}</th>`;
+                            });
+                            htmlContent += '</tr></thead>';
+
+                            // Table Body
+                            htmlContent += '<tbody>';
+                            data.forEach(dataRow => {
+                                htmlContent += '<tr>';
+                                // Loop through columns for each row
+                                headers.forEach(header => {
+                                    // Output data content for each cell
+                                    htmlContent += `<td>${dataRow[header]}</td>`;
+                                });
+                                htmlContent += '</tr>';
+                            });
+                            // Close final wrappers
+                            htmlContent += '</tbody>';
+                            htmlContent += '</table>';
+                            htmlContent += '</div>';
+                        }
+                    else {
+                        htmlContent += '<p>No data available for this region.</p>';
+                    }
+                    teamsDiv.innerHTML = htmlContent;
+
+                } catch (err) {
+                    console.error(err);
+                    const teamsDiv = document.getElementById("team-stats")
+                    if (teamsDiv) {
+                        teamsDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    }
+                }
+            }
+
+            // Attach listeners to team region buttons
+            teamFilterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    toggleFilter(teamFilterButtons, button);
+                    const selectedRegion = button.textContent;
+                    fetchTeamsTable(selectedRegion);
+                });
+            });
+            
+            // Load table for the initial load of page.
+            const initialRegion = getRegion();
+            fetchTeamsTable(initialRegion)
+        </script>
+    </body>
+</html>
+    

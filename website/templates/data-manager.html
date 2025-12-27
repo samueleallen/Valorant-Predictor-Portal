@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
     </head>
     <body>
-        <section class="player-page">
+        <section class="data-management-page">
             <nav>
                 <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='images/Valorant_logo.svg') }}"></a>
                 <div class="nav-links" id="navLinks">
@@ -22,49 +22,33 @@
                         <li><a href="{{ url_for('standings') }}">STANDINGS</a></li>
                         <li><a href="{{ url_for('players') }}">PLAYERS</a></li>
                         <li><a href="{{ url_for('admin') }}">DATA MANAGEMENT</a></li>
+                        <li class=search-bar-item>
+                            <div class="search-box">
+                                <input type="text" id="player_input" placeholder="Search Player IGN...">
+                                <div class="search-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="cancel-icon">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <ul id="suggestions" class="suggestions-list"></ul>
+                            </div>
+                        </li>
                     </ul>
                 </div>
                 <i class="fa fa-bars" onclick="showMenu()"></i>
             </nav>
 
-            <li class=search-bar-item>
-                
-                <div class="search-box">
-                    <input type="text" id="player_input" placeholder="Search Player IGN...">
-                    <div class="search-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="cancel-icon">
-                        <i class="fas fa-times"></i>
-                    </div>
-                </div>
-                <select id="agent-filter">
-                    <option value="All">All Agents</option>
-                    <option value="jett">Jett</option>
-                    <option value="reyna">Reyna</option>
-                    <option value="phoenix">Phoenix</option>
-                    <option value="astra">Astra</option>
-                    <option value="killjoy">Killjoy</option>
-                    <option value="omen">Omen</option>
-                </select>
-                <select id="region-filter">
-                    <option value="All">All Regions</option>
-                    <option value="Americas">Americas</option>
-                    <option value="China">China</option>
-                    <option value="EMEA">EMEA</option>
-                    <option value="Pacific">Pacific</option>
-                </select>
+            <div class="text-box">
+                <h1>Database Manager</h1>
+                <p>Explore below to add, update, or remove data.
+                </p>
+                <a href="{{ url_for('admin_players') }}" class="hero-btn">Manage Players</a>
+                <a href="{{ url_for('admin_teams') }}" class="hero-btn">Manage Teams</a>
+            </div>
 
-                <div class="toggle-container">
-                    <label for="timespan">Recent (90d)</label>
-                    <input type="checkbox" id="timespan-toggle">
-                </div>
-                    <ul id="suggestions" class="suggestions-list"></ul>
-                </div>
-            </li>
-
-            <div class="player-table-container">
-                <div id="player-table"></div>
+            <div class="player-stats-container">
+                <div id="player-stats"></div>
             </div>
         </section>
 
@@ -86,10 +70,7 @@
             const cancelButton = document.querySelector(".cancel-icon");
             const searchInput = document.getElementById("player_input");
             const suggestions = document.getElementById("suggestions");
-            const playerTableDiv = document.getElementById("player-table");
-            const regionFilter = document.getElementById("region-filter");
-            const agentFilter = document.getElementById("agent-filter");
-            const timespanToggle = document.getElementById("timespan-toggle");
+            const playerStatsDiv = document.getElementById("player-stats");
 
             searchButton.onclick =()=>{
                 searchBox.classList.add("active");
@@ -166,76 +147,7 @@
                 }
             }
 
-            // Fetch stats for player and dynamically load table
-            async function fetchPlayersTable() {
-                const region = regionFilter.value;
-                const agent = agentFilter.value;
-                const isRecent = timespanToggle.checked;
-                const timespan = isRecent ? "90_Days" : "All";
-                const playerName = searchInput.value;
-                const url = `http://localhost:3000/players/filtered?regionName=${encodeURIComponent(region)}&mainAgent=${encodeURIComponent(agent)}&timespan=${encodeURIComponent(timespan)}&`;
-
-                try {
-                    const res = await fetch(url);
-                    if (!res.ok) throw new Error("Could not find players.");
-                    const data = await res.json();
-
-                    // Display stats
-                    let htmlContent = `<h2>Search Results`;
-                    
-                        if (data && data.length > 0) {
-                            // Get unique column headers
-                            const headers = Object.keys(data[0])
-
-                            // Build table HTML
-                            htmlContent += '<div class="players-table-wrapper">';
-                            htmlContent += '<table>'
-                            
-                            // Table header
-                            htmlContent += '<thead><tr>';
-                            headers.forEach(header => {
-                                // Clean up headers
-                                const displayHeader = header.split('_').map(word => word.charAt().toUpperCase() + word.slice(1)).join(' ');
-                                htmlContent += `<th>${displayHeader}</th>`;
-                            });
-                            htmlContent += '</tr></thead>';
-
-                            // Table Body
-                            htmlContent += '<tbody>';
-                            data.forEach(dataRow => {
-                                htmlContent += '<tr>';
-                                // Loop through columns for each row
-                                headers.forEach(header => {
-                                    // Output data content for each cell
-                                    htmlContent += `<td>${dataRow[header]}</td>`;
-                                });
-                                htmlContent += '</tr>';
-                            });
-                            // Close final wrappers
-                            htmlContent += '</tbody>';
-                            htmlContent += '</table>';
-                            htmlContent += '</div>';
-                        }
-                    else {
-                        htmlContent += '<p>No players available for these filters.</p>';
-                    }
-                    playerTableDiv.innerHTML = htmlContent;
-
-                } catch (err) {
-                    console.error(err);
-                    playerTableDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
-                }
-            }
-
-            // Add filter event listeners
-            regionFilter.addEventListener("change", fetchPlayersTable);
-            agentFilter.addEventListener("change", fetchPlayersTable);
-            timespanToggle.addEventListener("change", fetchPlayersTable);
-
             searchInput.addEventListener("input", showSuggestions); // Trigger suggestions as user types
-            document.addEventListener("DOMContentLoaded", () => { // Auto-load table
-                fetchPlayersTable();
-            })
         </script>
     </body>
 </html>

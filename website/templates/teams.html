@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css">
     </head>
     <body>
-        <section class="player-page">
+        <section class="teams-page">
             <nav>
                 <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='images/Valorant_logo.svg') }}"></a>
                 <div class="nav-links" id="navLinks">
@@ -27,10 +27,14 @@
                 <i class="fa fa-bars" onclick="showMenu()"></i>
             </nav>
 
-            <li class=search-bar-item>
-                
+
+            <div class=search-bar-item>
+                <div class="text-box">
+                    <h1>Team Matches</h1>
+                    <p>Search a team below to find their matches.</p>
+                </div> 
                 <div class="search-box">
-                    <input type="text" id="player_input" placeholder="Search Player IGN...">
+                    <input type="text" id="team_input" placeholder="Search Team Name...">
                     <div class="search-icon">
                         <i class="fas fa-search"></i>
                     </div>
@@ -38,33 +42,37 @@
                         <i class="fas fa-times"></i>
                     </div>
                 </div>
-                <select id="agent-filter">
-                    <option value="All">All Agents</option>
-                    <option value="jett">Jett</option>
-                    <option value="reyna">Reyna</option>
-                    <option value="phoenix">Phoenix</option>
-                    <option value="astra">Astra</option>
-                    <option value="killjoy">Killjoy</option>
-                    <option value="omen">Omen</option>
-                </select>
-                <select id="region-filter">
-                    <option value="All">All Regions</option>
-                    <option value="Americas">Americas</option>
-                    <option value="China">China</option>
-                    <option value="EMEA">EMEA</option>
-                    <option value="Pacific">Pacific</option>
-                </select>
+                <div class="filters-container">
+                    <div class="region-container">
+                        <label for="region">Region</label>
+                        <select id="region-filter">
+                            <option value="All">All Regions</option>
+                            <option value="International">International</option>
+                            <option value="Local">Local</option>
+                        </select>
+                    </div>
 
-                <div class="toggle-container">
-                    <label for="timespan">Recent (90d)</label>
-                    <input type="checkbox" id="timespan-toggle">
+                    <div class="date-container">
+                        <div class="date-group">
+                            <label for="start-date">Start:</label>
+                            <input type="date" id="start-date">
+                        </div>
+                        <div class="date-group">
+                            <label for="end-date">End:</label>
+                            <input type="date" id="end-date">
+                        </div>
+                    </div>
+                    <div class="toggle-container">
+                        <label for="win">Win</label>
+                        <input type="checkbox" id="win-toggle">
+                    </div>
                 </div>
                     <ul id="suggestions" class="suggestions-list"></ul>
                 </div>
-            </li>
+            </div>
 
-            <div class="player-table-container">
-                <div id="player-table"></div>
+            <div class="team-table-container">
+                <div id="team-table"></div>
             </div>
         </section>
 
@@ -79,17 +87,18 @@
             }
 
         </script>
-    <!----- Java Script for Player Search ----->
+    <!----- Java Script for Team Search ----->
         <script>
             const searchBox = document.querySelector(".search-box");
             const searchButton = document.querySelector(".search-icon");
             const cancelButton = document.querySelector(".cancel-icon");
-            const searchInput = document.getElementById("player_input");
+            const searchInput = document.getElementById("team_input");
             const suggestions = document.getElementById("suggestions");
-            const playerTableDiv = document.getElementById("player-table");
+            const teamTableDiv = document.getElementById("team-table");
             const regionFilter = document.getElementById("region-filter");
-            const agentFilter = document.getElementById("agent-filter");
-            const timespanToggle = document.getElementById("timespan-toggle");
+            const startDateFilter = document.getElementById("start-date");
+            const endDateFilter = document.getElementById("end-date");
+            const winToggle = document.getElementById("win-toggle");
 
             searchButton.onclick =()=>{
                 searchBox.classList.add("active");
@@ -100,8 +109,8 @@
 
                 if (searchInput.value != "") {
                     // searchData.classList.remove("active");
-                    fetchPlayerStats(searchInput.value);
-                    suggestions.innerHTML = "";
+                    fetchMatchesTable();
+                    suggestions.classList.remove("active");
                 }
             }
             cancelButton.onclick =()=> {
@@ -111,15 +120,16 @@
                 cancelButton.classList.remove("active");
                 suggestions.classList.remove("active");
                 searchInput.value = "";
+                teamTableDiv.innerHTML = "";
             }
 
-            // Function to fetch all players for autocomplete
-            async function fetchPlayers() {
+            // Function to fetch all teams for autocomplete
+            async function fetchTeams() {
                 try {
-                    const res = await fetch(`http://localhost:3000/players`);
-                    if (!res.ok) throw new Error("Failed to fetch players.");
+                    const res = await fetch(`http://localhost:3000/teams`);
+                    if (!res.ok) throw new Error("Failed to fetch teams.");
                     const data = await res.json();
-                    return data.map(p => p.player_name);
+                    return data.map(t => t.team_name);
                 } catch (err) {
                     console.error(err);
                     return [];
@@ -128,10 +138,10 @@
 
             // Filter and show suggestions
             async function showSuggestions() {
-                // Fetch player list
-                const allPlayers = await fetchPlayers();
+                // Fetch team list
+                const allTeams = await fetchTeams();
 
-                // Set query for player
+                // Set query for team
                 const query = searchInput.value.toLowerCase();
                 suggestions.innerHTML = "";
                 
@@ -141,20 +151,18 @@
                     return;
                 }
                 
-                // Find top 5 players that match the input string
-                const matches = allPlayers.filter(name => name.toLowerCase().includes(query)).slice(0, 5)
+                // Find top 5 teams that match the input string
+                const matches = allTeams.filter(name => name.toLowerCase().includes(query)).slice(0, 5)
 
-                
                 matches.forEach(name => {
                     const li = document.createElement("li");
                     li.textContent = name;
                     li.classList.add("suggestion-item");
+                    // On click, load table
                     li.addEventListener("click", () => {
-                        window.location.href = `/players/${encodeURIComponent(name)}`;
-                        // searchInput.value = name;
-                        // suggestions.innerHTML = "";
-                        // suggestions.classList.remove("active");
-                        // fetchPlayerStats(name);
+                        searchInput.value = name;
+                        suggestions.classList.remove("active");
+                        fetchMatchesTable();
                     });
                     suggestions.appendChild(li);
                 });
@@ -166,18 +174,20 @@
                 }
             }
 
-            // Fetch stats for player and dynamically load table
-            async function fetchPlayersTable() {
+            // Fetch matches for team and dynamically load table
+            async function fetchMatchesTable() {
                 const region = regionFilter.value;
-                const agent = agentFilter.value;
-                const isRecent = timespanToggle.checked;
-                const timespan = isRecent ? "90_Days" : "All";
-                const playerName = searchInput.value;
-                const url = `http://localhost:3000/players/filtered?regionName=${encodeURIComponent(region)}&mainAgent=${encodeURIComponent(agent)}&timespan=${encodeURIComponent(timespan)}&`;
+                const startDate = startDateFilter.value;
+                const endDate = endDateFilter.value;
+                const isWin = winToggle.checked;
+                const teamName = searchInput.value;
+                const url = `http://localhost:3000/team/matches/filtered?teamName=${encodeURIComponent(teamName)}&regionName=${encodeURIComponent(region)}&win=${encodeURIComponent(isWin)}&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+
+                if (!teamName) return;
 
                 try {
                     const res = await fetch(url);
-                    if (!res.ok) throw new Error("Could not find players.");
+                    if (!res.ok) throw new Error("Could not find matches.");
                     const data = await res.json();
 
                     // Display stats
@@ -188,7 +198,7 @@
                             const headers = Object.keys(data[0])
 
                             // Build table HTML
-                            htmlContent += '<div class="players-table-wrapper">';
+                            htmlContent += '<div class="matches-table-wrapper">';
                             htmlContent += '<table>'
                             
                             // Table header
@@ -217,25 +227,22 @@
                             htmlContent += '</div>';
                         }
                     else {
-                        htmlContent += '<p>No players available for these filters.</p>';
+                        htmlContent += '<p>No matches available for these filters.</p>';
                     }
-                    playerTableDiv.innerHTML = htmlContent;
+                    teamTableDiv.innerHTML = htmlContent;
 
                 } catch (err) {
                     console.error(err);
-                    playerTableDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    teamTableDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
                 }
             }
 
             // Add filter event listeners
-            regionFilter.addEventListener("change", fetchPlayersTable);
-            agentFilter.addEventListener("change", fetchPlayersTable);
-            timespanToggle.addEventListener("change", fetchPlayersTable);
-
+            regionFilter.addEventListener("change", fetchMatchesTable);
+            startDateFilter.addEventListener("change", fetchMatchesTable);
+            endDateFilter.addEventListener("change", fetchMatchesTable);
+            winToggle.addEventListener("change", fetchMatchesTable);
             searchInput.addEventListener("input", showSuggestions); // Trigger suggestions as user types
-            document.addEventListener("DOMContentLoaded", () => { // Auto-load table
-                fetchPlayersTable();
-            })
         </script>
     </body>
 </html>

@@ -17,10 +17,11 @@
                     <i class="fa fa-times" onclick="hideMenu()"></i>
                     <ul>
                         <li><a href="{{ url_for('index') }}">HOME</a></li>
-                        <li><a href="">ABOUT</a></li>
-                        <li><a href="">MATCHES</a></li>
+                        <li><a href="{{ url_for('teams') }}">TEAMS</a></li>
+                        <li><a href="{{ url_for('matches') }}">MATCHES</a></li>
                         <li><a href="{{ url_for('standings') }}">STANDINGS</a></li>
-                        <li><a href="">CONTACT</a></li>
+                        <li><a href="{{ url_for('players') }}">PLAYERS</a></li>
+                        <li><a href="{{ url_for('admin') }}">DATA MANAGEMENT</a></li>
                     </ul>
                 </div>
                 <i class="fa fa-bars" onclick="showMenu()"></i>
@@ -30,7 +31,6 @@
                 <h1>VCT: News, Matches, and Analysis</h1>
                 <p>One of the most fun, engaging, and competitive esport scenes in the world.
                 </p>
-                <!-- <a href="" class="hero-btn">Click Here To Find Out More</a> -->
                  <!----- Player Search Bar ----->
                 <div class="search-box">
                     <input type="text" id="player_input" placeholder="Search Player IGN...">
@@ -42,7 +42,6 @@
                     </div>
                     <ul id="suggestions" class="suggestions-list"></ul>
             
-                <div class="stats" id="player-stats"></div>
             </div>
         </section>
 
@@ -72,11 +71,25 @@
                     <p>Date: Time:</p>
                 </div>
             </div>
-
+        </section>
+    
+    <!----- Agent Tier List Page ----->
+        <section class="agent-tier-list">
+            <h1>Agent Tier List</h1>
+            <p>Agents ranked by average KD and average ACS across all players.</p>
+            <div class="region-filters">
+                <button class="filter-btn active" data-region="ALL">ALL</button>
+                <button class="filter-btn" data-region="NA">Americas</button>
+                <button class="filter-btn" data-region="EU">EMEA</button>
+                <button class="filter-btn" data-region="PA">Pacific</button>
+                <button class="filter-btn" data-region="CH">China</button>
+            </div>
+            <div class="agent-tier-list-container">
+                <div id="agent-stats"></div>
+            </div>
         </section>
 
-    <!----- Dynamic Standings Page ----->
-
+    <!----- Standings Page ----->
         <section class="standings">
             <h1>2025 Regular Season Standings</h1>
             <div class="region-filters">
@@ -197,42 +210,17 @@
                 }
             }
 
-            // Fetch stats for player
-            async function fetchPlayerStats(playerName) {
-                try {
-                    const res = await fetch(`http://localhost:3000/player/${playerName}`);
-                    if (!res.ok) throw new Error("Player not found.");
-                    const data = await res.json();
-
-                    // Display stats
-                    playerStatsDiv.innerHTML = `
-                        <h2>${data.player_name}</h2>
-                        ${data.stats.length ? `
-                        <ul>
-                            ${data.stats.map(stat => 
-                                `<li>${Object.entries(stat).map(([key, value]) => `${key}: ${value}`).join(', ')}</li>`
-                            ).join('')}
-                        </ul>` : '<p>No stats available</p>'}
-                    `;
-                } catch (err) {
-                    console.error(err);
-                    playerStatsDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
-                }
-            }
-
             searchInput.addEventListener("input", showSuggestions); // Trigger suggestions as user types
              
         </script>
-    <!----- Java Script for Region Filters ----->
+    <!----- Java Script for Region Filters and Agents Tier List ----->
         <script>
-            // Container for match filters
             const matchesContainer = document.querySelector('.matches .region-filters');
             const matchesFilterButtons = matchesContainer.querySelectorAll('.filter-btn');
-            
-
-            // Container for standings filters
             const standingsContainer = document.querySelector('.standings .region-filters');
             const standingsFilterButtons = standingsContainer.querySelectorAll('.filter-btn');
+            const agentContainer = document.querySelector('.agent-tier-list .region-filters');
+            const agentFilterButtons = agentContainer.querySelectorAll('.filter-btn');
             
 
             // Function to handle toggling logic
@@ -240,9 +228,12 @@
                 buttons.forEach(btn => btn.classList.remove('active'));
 
                 clickedButton.classList.add('active');
-                
-                // TODO: Add filter logic here
-                   
+            }
+
+            // Function to get currently active region filter
+            function getRegion() {
+                const activeButton = agentContainer.querySelector('.filter-btn.active');
+                return activeButton.textContent;
             }
 
             // Attach listeners to matches buttons
@@ -258,7 +249,84 @@
                     toggleFilter(standingsFilterButtons, button);
                 });
             });
-        </script>
 
+            // Fetch Agent Tier List and dynamically load table
+            async function fetchAgentsTable(regionName) {
+                try {
+                    const url = `http://localhost:3000/agents/tierlist?regionName=${regionName}`
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error("Could not load table.");
+                    const data = await res.json();
+                    const agent = data.Agent;
+                    const kd = data.Average_KD;
+                    const acs = data.Average_ACS;
+                    const rounds = data.Total_Rounds;
+                    const rank = data.Rank;
+
+                    const agentsDiv = document.getElementById("agent-stats")
+
+                    // Display stats
+                    let htmlContent = `<h2>Ranking</h2>`;
+                    
+                        if (data && data.length > 0) {
+                            // Get unique column headers
+                            const headers = Object.keys(data[0])
+
+                            // Build table HTML
+                            htmlContent += '<div class="agents-table-wrapper">';
+                            htmlContent += '<table>'
+                            
+                            // Table header
+                            htmlContent += '<thead><tr>';
+                            headers.forEach(header => {
+                                // Clean up headers
+                                const displayHeader = header.split('_').map(word => word.charAt().toUpperCase() + word.slice(1)).join(' ');
+                                htmlContent += `<th>${displayHeader}</th>`;
+                            });
+                            htmlContent += '</tr></thead>';
+
+                            // Table Body
+                            htmlContent += '<tbody>';
+                            data.forEach(dataRow => {
+                                htmlContent += '<tr>';
+                                // Loop through columns for each row
+                                headers.forEach(header => {
+                                    // Output data content for each cell
+                                    htmlContent += `<td>${dataRow[header]}</td>`;
+                                });
+                                htmlContent += '</tr>';
+                            });
+                            // Close final wrappers
+                            htmlContent += '</tbody>';
+                            htmlContent += '</table>';
+                            htmlContent += '</div>';
+                        }
+                    else {
+                        console.error("Error. Could not load data");
+                    }
+                    agentsDiv.innerHTML = htmlContent;
+
+                } catch (err) {
+                    console.error(err);
+                    const agentsDiv = document.getElementById("agent-stats")
+                    if (agentsDiv) {
+                        agentsDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+                    }
+                }
+            }
+
+            // Attach listeners to agent region buttons
+            agentFilterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    toggleFilter(agentFilterButtons, button);
+                    const selectedRegion = button.textContent;
+                    fetchAgentsTable(selectedRegion);
+                });
+            });
+            
+            // Load table for the initial load of page.
+            const initialRegion = getRegion();
+            fetchAgentsTable(initialRegion)
+        </script>
     </body>
 </html>

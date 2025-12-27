@@ -13,8 +13,8 @@ DB_NAME = config.DB_NAME
 DB_USER = config.DB_USER
 DB_PASSWORD = config.DB_PASSWORD
 
-CSV_FILE_PATH = "C:/Users/Sam/Documents/Comp Sci/Valorant-Match-Predictor-w-Scraper-/content/player_stats.csv"
-CSV_FILE_PATH_90DAYS = "C:/Users/Sam/Documents/Comp Sci/Valorant-Match-Predictor-w-Scraper-/content/player_stats_90days.csv"
+CSV_FILE_PATH = "C:/Users/Sam/Documents/Comp Sci/Valorant-Stats-Portal/content/player_stats.csv"
+CSV_FILE_PATH_90DAYS = "C:/Users/Sam/Documents/Comp Sci/Valorant-Stats-Portal/content/player_stats_90days.csv"
 
 def get_or_create_player(cursor, player_name):
     """

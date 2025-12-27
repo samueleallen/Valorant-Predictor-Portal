@@ -13,7 +13,7 @@ DB_NAME = config.DB_NAME
 DB_USER = config.DB_USER
 DB_PASSWORD = config.DB_PASSWORD
 
-CSV_FILE_PATH = "C:/Users/Sam/Documents/Comp Sci/Valorant-Match-Predictor-w-Scraper-/content/team_regions.csv"
+CSV_FILE_PATH = "C:/Users/Sam/Documents/Comp Sci/Valorant-Stats-Portal/content/team_regions.csv"
 
 def get_or_create_team(cursor, team_name):
     """
