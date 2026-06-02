@@ -119,7 +119,6 @@
                 navLinks.style.right = "-200px";
             }
             
-            // Add this to your existing JavaScript
             operationRadios.forEach(radio => {
                 radio.addEventListener('change', (e) => {
                     console.log('Radio changed to:', e.target.value);
@@ -128,7 +127,6 @@
                 });
             });
 
-            // Also test if labels are working
             document.querySelectorAll('.operation-details .category label').forEach(label => {
                 label.addEventListener('click', (e) => {
                     console.log('Label clicked:', e.currentTarget.getAttribute('for'));
@@ -420,7 +418,7 @@
                         const data = await res.json();
 
                         if (res.ok) {
-                            displayStatus(`Success: ${data.message || 'Operation sucessfully completed.'}`, false);
+                            displayStatus(`Success: ${data.message || 'Operation successfully completed.'}`, false);
                             fetchTeamsTable();
                         } else {
                             displayStatus(`Error: ${data.error || 'Operation could not be completed.'} - ${data.message || ''}`, true );
